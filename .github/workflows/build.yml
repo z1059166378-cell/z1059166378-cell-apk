@@ -38,3 +38,4 @@ jobs:
       with:
         name: asphalt9-helper-apk
         path: bin/*.apk
+                        
