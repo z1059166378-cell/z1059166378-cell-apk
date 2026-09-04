@@ -17,8 +17,8 @@ jobs:
           python-version: '3.9'
 
       - name: Install Dependencies
-        working-directory: ./
         run: |
+          working-directory: ./
           sudo apt-get update
           sudo apt-get install -y git zip unzip openjdk-17-jdk \
             python3-pip autoconf libtool pkg-config zlib1g-dev \
