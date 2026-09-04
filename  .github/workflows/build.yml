@@ -17,12 +17,12 @@ jobs:
         python-version: '3.9'
 
     - name: Install Dependencies
-      whorking-directory:./
+    working-directory:./
       run: |
         sudo apt-get update
         sudo apt-get install -y git zip unzip openjdk-17-jdk \
           python3-pip autoconf libtool pkg-config zlib1g-dev \
-          libncurses5-dev libncursesw5-dev libtinfo5 cmake \
+          libncurses5-dev libncursesw5-dev libtinfo6 cmake \
           libffi-dev libssl-dev
 
     - name: Install Buildozer
@@ -39,3 +39,5 @@ jobs:
       with:
         name: asphalt9-helper-apk
         path: bin/*.apk
+
+                       
