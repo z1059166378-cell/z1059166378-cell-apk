@@ -1,1 +1,58 @@
+name: Build Android APK
 
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git zip unzip openjdk-17-jdk \
+            python3-pip autoconf libtool pkg-config zlib1g-dev \
+            libncurses5-dev libncursesw5-dev libtinfo6 cmake \
+            libffi-dev libssl-dev
+
+      - name: Install Buildozer
+        run: |
+          pip install buildozer cython
+
+      - name: Setup Android SDK and Accept Licenses
+        run: |
+          # 1. 设置 SDK 根目录 (Buildozer 默认使用的路径)
+          export ANDROID_SDK_ROOT=$HOME/.buildozer/android/platform/android-sdk
+          mkdir -p $ANDROID_SDK_ROOT/licenses
+
+          # 2. 【核心】直接写入通用的 Android SDK 许可证哈希值
+          # 这行代码等价于手动运行 sdkmanager --licenses 并按下 'y'
+          echo "24333f8a63b6825ea9c5514f83c2829b004d1fee" > $ANDROID_SDK_ROOT/licenses/android-sdk-license
+          echo "d56f5187479451eabf01fb78af6dfcb131a6481e" >> $ANDROID_SDK_ROOT/licenses/android-sdk-license
+          echo "24333f8a63b6825ea9c5514f83c2829b004d1fee" >> $ANDROID_SDK_ROOT/licenses/android-sdk-preview-license
+
+          # 3. 确保 cmdline-tools 存在 (Buildozer 有时会依赖它来检查版本)
+          # 如果 Buildozer 报错找不到 sdkmanager，可能需要手动下载 cmdline-tools
+          # 但通常 Buildozer 会自动处理下载，我们只需确保 licenses 存在即可
+
+      - name: Build APK
+        run: |
+          export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+          export ANDROID_SDK_ROOT=$HOME/.buildozer/android/platform/android-sdk
+          # 运行 Buildozer，它检测到 licenses 已存在，就会直接下载 build-tools 而不会询问
+          buildozer android debug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: asphalt9-helper-apk
+          path: bin/*.apk
